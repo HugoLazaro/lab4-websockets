@@ -3,7 +3,6 @@ package websockets
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.*
@@ -11,25 +10,19 @@ import org.springframework.boot.test.web.server.LocalServerPort
 import java.net.URI
 import java.util.concurrent.CountDownLatch
 import javax.websocket.*
-
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class ElizaServerTest {
-
     private lateinit var container: WebSocketContainer
-
     @LocalServerPort
     private var port: Int = 0
-
     @BeforeEach
     fun setup() {
         container = ContainerProvider.getWebSocketContainer()
     }
-
     @Test
     fun onOpen() {
         val latch = CountDownLatch(3)
         val list = mutableListOf<String>()
-
         val client = ElizaOnOpenMessageHandler(list, latch)
         container.connectToServer(client, URI("ws://localhost:$port/eliza"))
         latch.await()
@@ -37,16 +30,14 @@ class ElizaServerTest {
         assertEquals("The doctor is in.", list[0])
     }
 
-
     @Test
     fun onChat() {
         val latch = CountDownLatch(4)
         val list = mutableListOf<String>()
-
         val client = ElizaOnOpenMessageHandlerToComplete(list, latch)
         container.connectToServer(client, URI("ws://localhost:$port/eliza"))
         latch.await()
-        assert(3 < list.size)
+        assertEquals(4, list.size)
         assertEquals("Please don't apologize.", list[3])
     }
 }
@@ -59,10 +50,8 @@ class ElizaOnOpenMessageHandler(private val list: MutableList<String>, private v
         latch.countDown()
     }
 }
-
 @ClientEndpoint
 class ElizaOnOpenMessageHandlerToComplete(private val list: MutableList<String>, private val latch: CountDownLatch) {
-
     @OnMessage
     fun onMessage(message: String, session: Session) {
         list.add(message)
